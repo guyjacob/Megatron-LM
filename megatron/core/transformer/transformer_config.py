@@ -22,6 +22,7 @@ class TransformerConfig(ModelParallelConfig):
             num_attention_heads (int): Number of transformer attention heads.
             kv_channels (int): Projection weights dimension in multi-head attention. This is set to hidden_size // num_attention_heads if not provided. Defaults to None.
             num_query_groups (int): Number of query groups for group query attention. If None, normal attention is used.
+            embedding_dropout (float): Post embedding dropout probability. If None, hidden_dropout is used.
             hidden_dropout (float): Dropout probability for transformer hidden state. Defaults to 0.1.
             attention_dropout (float): Post attention dropout probability. Defaults to 0.1.
             fp32_residual_connection (bool): If true, move residual connections to fp32.
@@ -75,6 +76,7 @@ class TransformerConfig(ModelParallelConfig):
 
     ffn_hidden_size: int = None
     kv_channels: int = None
+    embedding_dropout: float = None
     hidden_dropout: float = 0.1
     attention_dropout: float = 0.1
     fp32_residual_connection: bool = False
@@ -168,6 +170,9 @@ class TransformerConfig(ModelParallelConfig):
                 f"num_query_groups ({self.num_query_groups}) must be a multiple of "
                 f"tensor_model_parallel_size ({self.tensor_model_parallel_size})."
             )
+
+        if self.embedding_dropout is None:
+            self.embedding_dropout = self.hidden_dropout
 
         if self.apply_query_key_layer_scaling:
             self.attention_softmax_in_fp32 = True
